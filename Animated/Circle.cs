@@ -30,8 +30,29 @@ namespace Animated
 
         public bool Move()
         {
-            _pos.X += _dx;
-            return _pos.X < _containerSize.Width - _diameter;
+            if (_pos.X < _containerSize.Width - _diameter)
+            {
+                _pos.X += _dx;
+                return true;
+            }
+            return false;
+        }
+
+        public void Animate()
+        {
+            new Thread(() =>
+            {
+                do
+                {
+                    Thread.Sleep(30);
+                } while (Move());
+            }).Start();
+        }
+
+        public void Clear(Graphics g)
+        {
+            var b = new SolidBrush(Color.White);
+            g.FillEllipse(b, _pos.X, _pos.Y, _diameter, _diameter);
         }
     }
 }
