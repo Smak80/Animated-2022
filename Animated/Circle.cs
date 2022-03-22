@@ -12,6 +12,8 @@ namespace Animated
         private int _diameter;
         private int _dx = 3;
         private Size _containerSize;
+        private Thread? t;
+        public bool IsAlive => t?.IsAlive == true;
         public Color Color { get; set; }
 
         public Circle(Size containerSize)
@@ -40,13 +42,18 @@ namespace Animated
 
         public void Animate()
         {
-            new Thread(() =>
+            if (!t?.IsAlive ?? true)
             {
-                do
+                t = new Thread(() =>
                 {
-                    Thread.Sleep(30);
-                } while (Move());
-            }).Start();
+                    do
+                    {
+                        Thread.Sleep(30);
+                    } while (Move());
+                });
+                t.IsBackground = true;
+                t.Start();
+            }
         }
 
         public void Clear(Graphics g)

@@ -11,6 +11,7 @@ namespace Animated
         private Size cSize;
         private BufferedGraphics bg;
         private Graphics _g;
+        private Thread? t;
         private Graphics g
         {
             get => _g;
@@ -39,24 +40,31 @@ namespace Animated
         }
         public void Start()
         {
-            Thread t = new Thread(() =>
+            if (t == null || !t.IsAlive)
             {
-                Graphics tg;
-                lock (bg) {
-                    tg = bg.Graphics;
-                }
-                do
+                t = new Thread(() =>
                 {
-                    tg.Clear(Color.White);
-                    for(int i = 0; i<circs.Count; i++)
+                    Graphics tg;
+                    lock (bg)
                     {
-                        circs[i].Paint(tg);
+                        tg = bg.Graphics;
                     }
-                    bg.Render(g);
-                    Thread.Sleep(30);
-                } while (true);
-            });
-            t.Start();
+
+                    do
+                    {
+                        tg.Clear(Color.White);
+                        circs.RemoveAll( it => !it.IsAlive);
+                        for (int i = 0; i < circs.Count; i++)
+                        {
+                            circs[i].Paint(tg);
+                        }
+                        bg.Render(g);
+                        Thread.Sleep(30);
+                    } while (true);
+                });
+                t.IsBackground = true;
+                t.Start();
+            }
         }
     }
 }
